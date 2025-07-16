@@ -20,7 +20,7 @@ function show_header() {
     echo "╚██████╔╝╚██████╔╝███████╗██████╔╝ ╚████╔╝ ██║     ███████║"
     echo " ╚═════╝  ╚═════╝ ╚══════╝╚═════╝   ╚═══╝  ╚═╝     ╚══════╝"
     echo -e "\e[0m"
-    echo -e "🚀 \e[1;33mKuzco Node Installer\e[0m - Powered by \e[1;33mGoldVPS Team\e[0m 🚀"
+    echo -e "🚀 \e[1;33mConfiguration Auto Installer\e[0m - Powered by \e[1;33mGoldVPS Team\e[0m 🚀"
     echo -e "🌐 \e[4;33mhttps://goldvps.net\e[0m - Best VPS with Low Price"
     echo ""
 }
@@ -30,30 +30,19 @@ function enable_root_ssh() {
     echo -e "${CYAN}🔧 Mengatur SSH agar root bisa login...${RESET}"
     SSH_CONFIG="/etc/ssh/sshd_config"
 
-    if grep -q '^PermitRootLogin' "$SSH_CONFIG"; then
-        sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' "$SSH_CONFIG"
+    # Periksa apakah baris PermitRootLogin sudah ada
+    if grep -qE '^\s*#?\s*PermitRootLogin' "$SSH_CONFIG"; then
+        sed -i 's/^\s*#\?\s*PermitRootLogin.*/PermitRootLogin yes/' "$SSH_CONFIG"
+        echo -e "${GREEN}✅ Baris PermitRootLogin sudah diperbarui.${RESET}"
     else
+        # Tambahkan secara rapi di bawah LoginGraceTime
         sed -i '/^#LoginGraceTime 2m/a PermitRootLogin yes' "$SSH_CONFIG"
+        echo -e "${GREEN}✅ PermitRootLogin ditambahkan di bawah #LoginGraceTime 2m.${RESET}"
     fi
 
     systemctl restart ssh
-    echo -e "${GREEN}✅ SSH dikonfigurasi. Sekarang atur password root:${RESET}"
+    echo -e "${GREEN}✅ SSH dikonfigurasi ulang. Sekarang atur password root:${RESET}"
     passwd root
-}
-
-# === Nonaktifkan IPv6 ===
-function disable_ipv6() {
-    echo -e "${CYAN}🔧 Menonaktifkan IPv6 secara permanen...${RESET}"
-    GRUB_FILE="/etc/default/grub"
-
-    if ! grep -q "ipv6.disable=1" "$GRUB_FILE"; then
-        sed -i 's/^GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="ipv6.disable=1 /' "$GRUB_FILE"
-        update-grub
-        echo -e "${YELLOW}♻️ Rebooting untuk menerapkan perubahan IPv6...${RESET}"
-        reboot
-    else
-        echo -e "${GREEN}✅ IPv6 sudah dinonaktifkan sebelumnya.${RESET}"
-    fi
 }
 
 # === Menu Interaktif ===
