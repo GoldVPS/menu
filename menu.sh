@@ -45,6 +45,21 @@ function enable_root_ssh() {
     passwd root
 }
 
+# === Nonaktifkan IPv6 ===
+function disable_ipv6() {
+    echo -e "${CYAN}🔧 Menonaktifkan IPv6 secara permanen...${RESET}"
+    GRUB_FILE="/etc/default/grub"
+
+    if grep -q "ipv6.disable=1" "$GRUB_FILE"; then
+        echo -e "${GREEN}✅ IPv6 sudah dinonaktifkan sebelumnya.${RESET}"
+    else
+        sed -i 's/^GRUB_CMDLINE_LINUX="/GRUB_CMDLINE_LINUX="ipv6.disable=1 /' "$GRUB_FILE"
+        update-grub
+        echo -e "${YELLOW}♻️ Rebooting untuk menerapkan perubahan IPv6...${RESET}"
+        reboot
+    fi
+}
+
 # === Menu Interaktif ===
 function show_menu() {
     echo -e "${BLUE_LINE}"
@@ -67,7 +82,7 @@ function show_menu() {
             exit 0
             ;;
         *)
-            echo -e "${RED}Opsi tidak valid!${RESET}"
+            echo -e "${RED}❌ Opsi tidak valid!${RESET}"
             ;;
     esac
 }
