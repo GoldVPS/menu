@@ -25,7 +25,13 @@ function show_header() {
     echo ""
 }
 
-# === Konfigurasi SSH ===
+# === Persiapan Awal: Update dan Install nano ===
+function prepare_environment() {
+    echo -e "${CYAN}🔧 Melakukan update dan instalasi nano...${RESET}"
+    apt update -y && apt install nano -y
+    echo -e "${GREEN}✅ Update selesai dan nano terpasang.${RESET}"
+}
+
 # === Konfigurasi SSH ===
 function enable_root_ssh() {
     echo -e "${YELLOW}[*] Mengaktifkan login root via SSH...${RESET}"
@@ -100,4 +106,5 @@ function show_menu() {
 
 # === Eksekusi ===
 show_header
+prepare_environment
 show_menu
