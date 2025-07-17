@@ -26,23 +26,34 @@ function show_header() {
 }
 
 # === Konfigurasi SSH ===
+# === Konfigurasi SSH ===
 function enable_root_ssh() {
-    echo -e "${CYAN}🔧 Mengatur SSH agar root bisa login...${RESET}"
-    SSH_CONFIG="/etc/ssh/sshd_config"
+    echo -e "${YELLOW}[*] Mengaktifkan login root via SSH...${RESET}"
 
-    # Periksa apakah baris PermitRootLogin sudah ada
-    if grep -qE '^\s*#?\s*PermitRootLogin' "$SSH_CONFIG"; then
-        sed -i 's/^\s*#\?\s*PermitRootLogin.*/PermitRootLogin yes/' "$SSH_CONFIG"
-        echo -e "${GREEN}✅ Baris PermitRootLogin sudah diperbarui.${RESET}"
+    SSH_CONFIG="/etc/ssh/sshd_config"
+    BACKUP_PATH="${SSH_CONFIG}.bak"
+
+    # Backup config SSH
+    cp "$SSH_CONFIG" "$BACKUP_PATH"
+
+    # Cek apakah ada PermitRootLogin
+    if grep -Eq '^\s*#?\s*PermitRootLogin\s+' "$SSH_CONFIG"; then
+        sed -i -E 's|^\s*#?\s*PermitRootLogin\s+.*|PermitRootLogin yes|' "$SSH_CONFIG"
+        echo -e "${GREEN}[✔] Baris PermitRootLogin berhasil diubah.${RESET}"
     else
-        # Tambahkan secara rapi di bawah LoginGraceTime
-        sed -i '/^#LoginGraceTime 2m/a PermitRootLogin yes' "$SSH_CONFIG"
-        echo -e "${GREEN}✅ PermitRootLogin ditambahkan di bawah #LoginGraceTime 2m.${RESET}"
+        sed -i '/^\s*#\?\s*LoginGraceTime\s\+/a PermitRootLogin yes' "$SSH_CONFIG"
+        echo -e "${GREEN}[✔] Baris PermitRootLogin ditambahkan setelah LoginGraceTime.${RESET}"
     fi
 
-    systemctl restart ssh
-    echo -e "${GREEN}✅ SSH dikonfigurasi ulang. Sekarang atur password root:${RESET}"
+    # Set password root
+    echo -e "${YELLOW}[*] Silakan masukkan password baru untuk user root:${RESET}"
     passwd root
+
+    # Restart SSH
+    echo -e "${YELLOW}[*] Merestart SSH...${RESET}"
+    systemctl restart sshd
+
+    echo -e "${GREEN}[✔] Root login aktif dan SSH sudah direstart.${RESET}"
 }
 
 # === Nonaktifkan IPv6 ===
